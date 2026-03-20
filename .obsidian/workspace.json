@@ -1,0 +1,231 @@
+{
+  "main": {
+    "id": "bd7abcc2cd29778f",
+    "type": "split",
+    "children": [
+      {
+        "id": "c22414d790b821e3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bb24dad86d692115",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "英语/论点-论据原则.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "论点-论据原则"
+            }
+          },
+          {
+            "id": "d0d36ef3bd54bf67",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "英语/论点-论据原则.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "论点-论据原则"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "0025e86165247dd9",
+    "type": "split",
+    "children": [
+      {
+        "id": "811ff65e4513c19e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "de16f63c749ffd58",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "84a038313b3b00be",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "color",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "9c04b4d75ad9e38d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 298.504695892334
+  },
+  "right": {
+    "id": "9208f13ae78e3adf",
+    "type": "split",
+    "children": [
+      {
+        "id": "50ec649999b90af3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "84b029cdd1efc8e5",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "style.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for style"
+            }
+          },
+          {
+            "id": "6a0b2dca8722d548",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "style.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from style"
+            }
+          },
+          {
+            "id": "098c7ff117f73b3c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "d3f533d6b948d181",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "style.md"
+              },
+              "icon": "lucide-list",
+              "title": "Outline of style"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "de16f63c749ffd58",
+  "lastOpenFiles": [
+    "数学/math-souls/皮亚诺公理.html",
+    "数学/math-souls/皮亚诺公理.hrml",
+    "数学/数学笔记",
+    "第四轮数学学科评估.md",
+    "择校/第四轮数学学科评估.md",
+    "择校/Pasted image 20260320100144.png",
+    "择校/Pasted image 20260320100123.png",
+    "择校/Pasted image 20260320100108.png",
+    "择校",
+    "数学/math-souls/择校/Pasted image 20260320100108.png",
+    "数学/math-souls/择校",
+    "数学/math-souls/katex.min.css",
+    "数学/math-souls/katex.min.js",
+    "数学/math-souls/three.min.js",
+    "数学/math-souls/README.md",
+    "Pasted image 20260320100144.png",
+    "Pasted image 20260320100123.png",
+    "Pasted image 20260320100108.png",
+    "英语/论点-论据原则.md",
+    "英语/七选五做题方法.md",
+    "英语/word老虎机说明文档.txt",
+    "英语/word.html",
+    "数学",
+    "Pasted image 20250308213827.png",
+    "CS/数据结构/solved problems/排序【验证】.md",
+    "CS/大自然记忆法/树.md",
+    "CS/操作系统/OS发展历史.md",
+    "CS/操作系统/OS运行环境.md",
+    "CS/操作系统/系统调用.md",
+    "CS/操作系统/操作系统.md",
+    "CS/操作系统/并发.md",
+    "Untitled/Math/实变函数复习.md",
+    "Pasted image 20250325212942.png",
+    "分时操作系统.md",
+    "英语/阅读/历年真题/2011 英一.md",
+    "英语/阅读/具有暗示下的词语.md",
+    "英语/阅读/阅读工具箱.md",
+    "英语/乱糟糟的语料库.md",
+    "Untitled/Math/分析学通鉴（pausing）/第三卷：统一的野心——分析、代数与几何的共舞/0.1 第三章鸟览.md",
+    "Untitled/Math/分析学通鉴（pausing）/第二卷：空间的交响—从欧氏到抽象/0.1 第二章鸟览.md",
+    "Untitled/我的互联网老师们.md",
+    "CS/组成原理/主存储器.md",
+    "Pasted image 20250320104525.png",
+    "Untitled/Math/分析学通鉴（pausing）/第一卷：分析的基石—从收敛性到无限维/微积分的婴儿期.md",
+    "Untitled/Math/分析学通鉴（pausing）/@@短期大纲@@.md",
+    "CS/组成原理/存储器.md"
+  ]
+}

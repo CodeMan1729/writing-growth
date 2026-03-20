@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单词老虎机 · Word Slots</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+SC:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/*
+=================================================================
+  【录入单词方法】
+  在 JS 区域找到 const WORD_BANK = [...] 按格式添加对象。
+
+  单选题（options 中恰好 1 个 correct:true，共 3 项）：
+  {
+    word:     "ephemeral",
+    pos:      "adj.",
+    sentence: "The ephemeral beauty of cherry blossoms makes them precious.",
+    options: [
+      { text: "短暂的，瞬息的", correct: true  },
+      { text: "永恒的",         correct: false },
+      { text: "显著的",         correct: false }
+    ]
+  }
+
+  多选题（options 中 2+ 个 correct:true，共 5 项）：
+  {
+    word:     "meticulous",
+    pos:      "adj.",
+    sentence: "She was meticulous in her research.",
+    options: [
+      { text: "一丝不苟的",   correct: true  },
+      { text: "非常细致的",   correct: true  },
+      { text: "粗心大意的",   correct: false },
+      { text: "迅速果断的",   correct: false },
+      { text: "固执己见的",   correct: false }
+    ]
+  }
+
+  规则：
+  - 单选 3 个选项，恰好 1 个 correct:true
+  - 多选 5 个选项，2~4 个 correct:true
+  - 多选题多答、少答、错答均不得分且扣分
+
+  【积分 & 连击】
+  答对+10 | combo×2→+20 | combo×3→+30 | combo≥4→+40
+  暴击(~15%)→当轮×2  |  答错→-(5×min(combo,4))，积分≥0，连击清零
+
+  【段位】0新芽 100学徒 300学者 700达人 1500大师 3000传说
+
+  【持久化】localStorage，key前缀"wordslots_"
+  清除：浏览器控制台执行 localStorage.clear()
+=================================================================
+*/
+:root{
+  --bg:#0d0d0f;--surface:#16161a;--surface2:#1e1e24;--border:#2a2a35;
+  --accent:#f5c518;--accent2:#e05c2a;--correct:#3ddc84;--wrong:#ff4d6d;
+  --text:#e8e8f0;--text-dim:#7a7a9a;--combo:#a78bfa;--crit:#ffd700;
+  --font-display:'Bebas Neue',cursive;--font-body:'Noto Serif SC',serif;
+  --font-mono:'Space Mono',monospace;--radius:12px;
+  --shadow:0 8px 32px rgba(0,0,0,0.6);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--font-body);
+  min-height:100vh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 0%,rgba(245,197,24,0.07) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 100%,rgba(224,92,42,0.07) 0%,transparent 55%);
+}
+.app{max-width:860px;margin:0 auto;padding:24px 16px 80px}
+
+/* Header */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:12px;flex-wrap:wrap}
+.title{
+  font-family:var(--font-display);font-size:3rem;letter-spacing:0.08em;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1
+}
+.title .sub{
+  font-size:0.9rem;font-family:var(--font-mono);-webkit-text-fill-color:var(--text-dim);
+  display:block;letter-spacing:0.22em;margin-top:4px
+}
+.status-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:4px}
+.stat-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:8px 14px;text-align:center;min-width:70px
+}
+.stat-box .val{font-family:var(--font-display);font-size:1.6rem;color:var(--accent);display:block;line-height:1}
+.stat-box .lbl{font-size:0.6rem;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase;margin-top:2px;display:block}
+.rank-badge{background:var(--surface);border:1px solid var(--accent);border-radius:20px;padding:7px 16px;font-size:0.88rem;color:var(--accent);white-space:nowrap}
+.best-badge{background:var(--surface);border:1px solid var(--combo);border-radius:20px;padding:7px 14px;font-size:0.78rem;color:var(--combo);white-space:nowrap;font-family:var(--font-mono)}
+
+/* Combo */
+.combo-display{text-align:center;height:52px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.combo-text{
+  font-family:var(--font-display);font-size:2.4rem;color:var(--combo);letter-spacing:0.14em;
+  opacity:0;transform:scale(0.7);transition:opacity 0.25s,transform 0.25s;
+  text-shadow:0 0 24px rgba(167,139,250,0.7);pointer-events:none
+}
+.combo-text.show{opacity:1;transform:scale(1)}
+.combo-text.bounce{animation:comboBounce 0.35s ease}
+@keyframes comboBounce{0%{transform:scale(1)}40%{transform:scale(1.5)}70%{transform:scale(0.88)}100%{transform:scale(1)}}
+
+/* Slot Machine */
+.slot-machine{
+  background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:24px 24px 20px;margin-bottom:24px;box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.slot-machine::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(245,197,24,0.04) 0%,transparent 40%,transparent 60%,rgba(245,197,24,0.04) 100%)
+}
+.reels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.reel-wrap{
+  position:relative;height:88px;overflow:hidden;
+  border-radius:8px;background:var(--bg);border:1px solid var(--border)
+}
+.reel-wrap::before,.reel-wrap::after{
+  content:'';position:absolute;left:0;right:0;height:24px;z-index:2;pointer-events:none
+}
+.reel-wrap::before{top:0;background:linear-gradient(to bottom,var(--bg),transparent)}
+.reel-wrap::after{bottom:0;background:linear-gradient(to top,var(--bg),transparent)}
+.reel-line{
+  position:absolute;top:50%;left:8px;right:8px;height:2px;background:var(--accent);
+  opacity:0.25;transform:translateY(-50%);z-index:3;pointer-events:none
+}
+.reel{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column}
+.reel-item{
+  height:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:1.15rem;letter-spacing:0.05em;
+  color:var(--text);padding:0 6px;text-align:center;text-transform:lowercase
+}
+.reel-item.chosen{color:var(--accent);text-shadow:0 0 18px rgba(245,197,24,0.6)}
+@keyframes reelScroll{0%{transform:translateY(0)}100%{transform:translateY(calc(-88px * 6))}}
+.reel.spinning{animation:reelScroll 0.32s linear infinite}
+
+.spin-btn{
+  display:block;width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  color:#0d0d0f;font-family:var(--font-display);font-size:1.9rem;letter-spacing:0.2em;
+  border:none;border-radius:8px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;
+  box-shadow:0 4px 22px rgba(245,197,24,0.4);position:relative;overflow:hidden
+}
+.spin-btn::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,0.15) 0%,transparent 60%)
+}
+.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,197,24,0.55)}
+.spin-btn:active:not(:disabled){transform:translateY(1px);box-shadow:0 2px 10px rgba(245,197,24,0.3)}
+.spin-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* Question Cards */
+.questions-area{display:flex;flex-direction:column;gap:16px}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px 24px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px);
+  animation:cardIn 0.4s ease forwards;transition:border-color 0.3s
+}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+.q-card:nth-child(1){animation-delay:0.05s}
+.q-card:nth-child(2){animation-delay:0.2s}
+.q-card:nth-child(3){animation-delay:0.35s}
+.q-card.answered-correct{border-color:rgba(61,220,132,0.5)}
+.q-card.answered-wrong{border-color:rgba(255,77,109,0.5)}
+
+.q-type-badge{
+  display:inline-block;font-size:0.63rem;font-family:var(--font-mono);
+  letter-spacing:0.12em;text-transform:uppercase;padding:3px 9px;border-radius:4px;
+  margin-bottom:12px;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)
+}
+.q-type-badge.multi{color:var(--combo);border-color:var(--combo);background:rgba(167,139,250,0.1)}
+
+.q-word{font-family:var(--font-mono);font-size:1.5rem;color:var(--accent);letter-spacing:0.06em;display:block;margin-bottom:2px;text-transform:lowercase}
+.q-pos{font-family:var(--font-mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:14px;display:block}
+.q-prompt{font-size:1rem;line-height:1.7;margin-bottom:14px;color:var(--text)}
+.q-sentence{
+  font-style:italic;color:var(--text-dim);font-size:0.95rem;line-height:1.7;
+  margin-bottom:14px;padding:10px 14px;
+  border-left:3px solid var(--accent);opacity:0.85;
+  background:var(--surface2);border-radius:0 6px 6px 0
+}
+.q-sentence .hl{color:var(--accent);font-style:normal;font-weight:700;text-decoration:underline;text-decoration-color:rgba(245,197,24,0.4)}
+
+.options{display:flex;flex-direction:column;gap:8px}
+.option-btn{
+  width:100%;text-align:left;padding:11px 16px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font-body);font-size:0.95rem;
+  cursor:pointer;transition:border-color 0.15s,background 0.15s,transform 0.1s;
+  display:flex;align-items:center;gap:10px
+}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(245,197,24,0.07);transform:translateX(3px)}
+.option-btn .opt-label{font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim);min-width:18px;flex-shrink:0}
+.option-btn.selected{border-color:var(--accent);background:rgba(245,197,24,0.1)}
+.option-btn.correct{border-color:var(--correct)!important;background:rgba(61,220,132,0.12)!important;color:var(--correct)!important}
+.option-btn.wrong{border-color:var(--wrong)!important;background:rgba(255,77,109,0.12)!important;color:var(--wrong)!important}
+.option-btn:disabled{cursor:default;transform:none!important}
+
+.submit-multi{
+  margin-top:12px;padding:10px 24px;background:var(--combo);color:#fff;
+  font-family:var(--font-mono);font-size:0.85rem;border:none;border-radius:8px;
+  cursor:pointer;letter-spacing:0.08em;transition:opacity 0.15s,transform 0.15s
+}
+.submit-multi:hover{opacity:0.85;transform:translateY(-1px)}
+.submit-multi:disabled{opacity:0.35;cursor:default;transform:none}
+
+.q-result{
+  margin-top:12px;padding:10px 14px;border-radius:8px;font-size:0.88rem;
+  display:none;align-items:center;gap:8px;font-family:var(--font-mono)
+}
+.q-result.show{display:flex}
+.q-result.correct-fb{background:rgba(61,220,132,0.1);border:1px solid var(--correct);color:var(--correct)}
+.q-result.wrong-fb{background:rgba(255,77,109,0.08);border:1px solid var(--wrong);color:var(--wrong)}
+.q-result .score-delta{font-family:var(--font-display);font-size:1.4rem;margin-left:auto}
+
+/* Flash overlay */
+.flash-overlay{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0}
+.flash-overlay.correct-flash{
+  background:radial-gradient(ellipse at center,rgba(61,220,132,0.28) 0%,transparent 70%);
+  animation:flashAnim 0.7s ease forwards
+}
+.flash-overlay.wrong-flash{
+  background:radial-gradient(ellipse at center,rgba(255,77,109,0.25) 0%,transparent 70%);
+  animation:flashAnim 0.55s ease forwards
+}
+.flash-overlay.crit-flash{
+  background:radial-gradient(ellipse at center,rgba(255,215,0,0.38) 0%,transparent 65%);
+  animation:flashAnim 1s ease forwards
+}
+@keyframes flashAnim{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-9px)}
+  30%{transform:translateX(9px)}
+  45%{transform:translateX(-7px)}
+  60%{transform:translateX(7px)}
+  75%{transform:translateX(-4px)}
+  90%{transform:translateX(4px)}
+}
+.shake{animation:shake 0.5s ease}
+
+.crit-label{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.4);
+  font-family:var(--font-display);font-size:5rem;color:var(--crit);
+  text-shadow:0 0 40px rgba(255,215,0,0.9),0 0 80px rgba(255,215,0,0.5);
+  letter-spacing:0.15em;pointer-events:none;z-index:10000;
+  opacity:0;animation:critPop 1.1s ease forwards
+}
+@keyframes critPop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  45%{transform:translate(-50%,-50%) scale(0.95)}
+  65%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-62%) scale(1.05)}
+}
+
+.score-popup{
+  position:fixed;pointer-events:none;z-index:9998;
+  font-family:var(--font-display);font-size:2.2rem;
+  animation:scoreFloat 1.3s ease forwards
+}
+@keyframes scoreFloat{
+  0%{opacity:1;transform:translateY(0) translateX(-50%)}
+  100%{opacity:0;transform:translateY(-70px) translateX(-50%)}
+}
+
+.today-bar{
+  display:flex;gap:8px;align-items:center;justify-content:center;
+  margin-bottom:20px;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim)
+}
+.today-bar span{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="title">WORD SLOTS<span class="sub">VOCABULARY MACHINE</span></div>
+    <div class="status-bar">
+      <div class="stat-box"><span class="val" id="scoreVal">0</span><span class="lbl">Score</span></div>
+      <div class="stat-box"><span class="val" id="comboVal">0</span><span class="lbl">Combo</span></div>
+      <div id="rankBadge" class="rank-badge">🌱 新芽</div>
+      <div class="best-badge">最高连击 <span id="bestComboVal">0</span></div>
+    </div>
+  </div>
+
+  <div class="today-bar">
+    今日答题 <span id="todayTotal">0</span> 题 · 正确 <span id="todayCorrect">0</span> 题 · 正确率 <span id="todayRate">-</span>
+  </div>
+
+  <div class="combo-display"><div class="combo-text" id="comboText">COMBO ×1</div></div>
+
+  <div class="slot-machine">
+    <div class="reels">
+      <div class="reel-wrap"><div class="reel-line"></div><div class="reel" id="reel0"></div></div>
+      <div class="reel-wrap"><div class="reel-line"></div><div class="reel" id="reel1"></div></div>
+      <div class="reel-wrap"><div class="reel-line"></div><div class="reel" id="reel2"></div></div>
+    </div>
+    <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+  </div>
+
+  <div class="questions-area" id="questionsArea"></div>
+</div>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+
+<script>
+// =================================================================
+// 【单词库】在这里添加你的单词（2026.3.17版本）
+// 单选：options 共3项，恰好1个 correct:true
+// 多选：options 共5项，2~4个 correct:true
+// =================================================================
+const WORD_BANK = [
+  {
+    word: "ephemeral",
+    pos: "adj.",
+    sentence: "The ephemeral beauty of cherry blossoms makes them all the more precious.",
+    options: [
+      { text: "短暂的，瞬息的", correct: true  },
+      { text: "永恒的",         correct: false },
+      { text: "显著的",         correct: false }
+    ]
+  },
+  {
+    word: "ubiquitous",
+    pos: "adj.",
+    sentence: "Smartphones have become ubiquitous in modern society.",
+    options: [
+      { text: "无处不在的", correct: true  },
+      { text: "罕见的",     correct: false },
+      { text: "昂贵的",     correct: false }
+    ]
+  },
+  {
+    word: "meticulous",
+    pos: "adj.",
+    sentence: "She was meticulous in her research, checking every detail twice.",
+    options: [
+      { text: "一丝不苟的", correct: true  },
+      { text: "非常细致的", correct: true  },
+      { text: "粗心大意的", correct: false },
+      { text: "迅速果断的", correct: false },
+      { text: "固执己见的", correct: false }
+    ]
+  },
+  {
+    word: "tenacious",
+    pos: "adj.",
+    sentence: "His tenacious spirit helped him overcome every obstacle.",
+    options: [
+      { text: "坚韧的",   correct: true  },
+      { text: "顽强不屈的", correct: true  },
+      { text: "懦弱的",   correct: false },
+      { text: "冷漠的",   correct: false },
+      { text: "善变的",   correct: false }
+    ]
+  },
+  {
+    word: "eloquent",
+    pos: "adj.",
+    sentence: "The eloquent speaker captivated the entire audience.",
+    options: [
+      { text: "口才流利的", correct: true  },
+      { text: "沉默的",     correct: false },
+      { text: "笨拙的",     correct: false }
+    ]
+  },
+  {
+    word: "ambiguous",
+    pos: "adj.",
+    sentence: "The contract contained several ambiguous clauses that caused disputes.",
+    options: [
+      { text: "模棱两可的", correct: true  },
+      { text: "含糊不清的", correct: true  },
+      { text: "清晰明确的", correct: false },
+      { text: "严格规范的", correct: false },
+      { text: "正式官方的", correct: false }
+    ]
+  },
+  {
+    word: "premier",
+    pos: "n./adj.",
+    sentence: "For much of that time, the regatta was one of the country’s premier sporting events.",
+    options: [
+      { text: "总理 --- 类似于李强", correct:true},
+      { text: "预算", correct:false},
+      { text: "第一的，首要的", correct:true},
+      { text: "是soar的近义词", correct:false},
+    ]
+  },
+  {
+    word: "breath",
+    pos: "n.",
+    sentence: "Canada premiers(the leaders of provincial governments), if they have any breath left after complaining about Ottawa at their late July annual meeting,may spare a moment to do something,together, to reduce health-care cost.",
+    options: [
+      { text: "新鲜的空气，呼吸", correct:true},
+      { text: "猛冲", correct: false},
+      { text: "平和的", correct:false},
+
+    ]
+  },
+  {
+    word: "breath of fresh air",
+    pos: "n.",
+    sentence: "A breath of fresh air with some other interesting smells wafted in past them",
+    options: [
+      { text: "新鲜空气；令人耳目一新的人/事", correct:true},
+      { text: "省的，粗野的", correct:false},
+      { text: "制药的，药品", correct:false},
+      { text: "司法权", correct:false},
+    ]
+  },
+  {
+    word: "groan",
+    pos: "v.",
+    sentence: "When my daughter was a toddler, she often imitated the long groan I made when I bent down.",
+    options: [
+      { text: "因疼痛、不满等发出低沉的呻吟声", correct: true  },
+      { text: "大声欢呼、喝彩",                 correct: false },
+      { text: "轻声低语、耳语",                 correct: false }
+    ]
+  },
+  {
+    word: "soar",
+    pos: "v.",
+    sentence: "As wages increased and the cost of raw ingredients soared, food companies started passing along those expenses to customers.",
+    options: [
+      { text: "快速上升、飙升",     correct: true  },
+      { text: "急剧下降、暴跌",     correct: false },
+      { text: "缓慢增长、逐步提升", correct: false }
+    ]
+  },
+  {
+    word: "pharmaceutical",
+    pos: "adj./n.",
+    sentence: "Major pharmaceutical companies have been buying the rights to drugs created in China for cancer, obesity, heart disease and Crohn's disease.",
+    options: [
+      { text: "与药品生产、销售相关的；制药公司或药品", correct: true  },
+      { text: "与金融投资相关的；金融产品",             correct: false },
+      { text: "与农业种植相关的；农业公司",             correct: false }
+    ]
+  },
+  {
+    word: "bureaucracy",
+    pos: "n.",
+    sentence: "It's not only that growing bureaucracies cost a lot of money; they also enervate American society.",
+    options: [
+      { text: "官僚体制、繁琐的行政系统",   correct: true  },
+      { text: "令社会效率低下的行政程序", correct: true  },
+      { text: "高效的管理模式",           correct: false },
+      { text: "军事指挥结构",             correct: false },
+      { text: "志愿服务组织",             correct: false }
+    ]
+  },
+  {
+    word: "on behalf of",
+    pos: "prep. phrase",
+    sentence: "Jack Smith appeared in a new video advocating on behalf of Justice Department employees who were fired or forced out by the Trump administration.",
+    options: [
+      { text: "代表某人、替某人",   correct: true  },
+      { text: "反对某人、与…对立", correct: false },
+      { text: "不顾某人、无视…",   correct: false }
+    ]
+  },
+  {
+    word: "likelihood",
+    pos: "n.",
+    sentence: "Judge Boasberg said there was a 'fair likelihood' that the Trump administration had violated his order to stop deporting Venezuelan migrants to El Salvador.",
+    options: [
+      { text: "可能性、几率",   correct: true  },
+      { text: "可信度、权威性", correct: false },
+      { text: "紧迫性、急迫感", correct: false }
+    ]
+  },
+  {
+    word: "falsehood",
+    pos: "n.",
+    sentence: "Whether it is cloned voices being used to empty bank accounts or AI-generated videos of politicians behaving badly, the digital world has long harboured fakery, falsehood and fraud.",
+    options: [
+      { text: "谎言、虚假陈述", correct: true  },
+      { text: "谦虚、低调",     correct: false },
+      { text: "正义、公平",     correct: false }
+    ]
+  },
+  {
+    word: "regrettably",
+    pos: "adv.",
+    sentence: "In blog posts calibrated for maximum gasp just before the release of her regrettably self-serious new book, Nuzzi's former fiancé has shared the most X-rated lines of Kennedy's love poetry.",
+    options: [
+      { text: "遗憾地、可惜地", correct: true  },
+      { text: "高兴地、欣喜地", correct: false },
+      { text: "意外地、突然地", correct: false }
+    ]
+  },
+  {
+    word: "fork over",
+    pos: "phrasal v.",
+    sentence: "The latest action compels the city to turn over an additional $106 million.",
+    options: [
+      { text: "不情愿地支付、交出", correct: true  },
+      { text: "拒绝交出、扣留",     correct: false },
+      { text: "主动捐献、慷慨给予", correct: false }
+    ]
+  },
+  {
+    word: "jurisdiction",
+    pos: "n.",
+    sentence: "The refusal to produce the prisoner was based on the want of jurisdiction of the State Courts, as set forth in the famous case of ABLEMAN vs. BOOTH.",
+    options: [
+      { text: "司法管辖权、管辖范围", correct: true  },
+      { text: "立法权、议会权力",     correct: false },
+      { text: "行政执行权、警察权力", correct: false }
+    ]
+  },
+  {
+    word: "provincialist ideology",
+    pos: "n. phrase",
+    sentence: "This may sound very bizarre, and I accept that it's my own weird provincialism, and it's my strange perspective as an American who lives at least part of the time in Poland.",
+    options: [
+      { text: "地方主义意识形态、狭隘地域观念", correct: true  },
+      { text: "固守一隅、缺乏全局视野的思想",   correct: true  },
+      { text: "全球化思维、开放包容理念",         correct: false },
+      { text: "民族主义精神、爱国主义情怀",       correct: false },
+      { text: "精英主义意识、阶层优越感",         correct: false }
+    ]
+  },
+  {
+    word: "communist ideology",
+    pos: "n. phrase",
+    sentence: "The characteristics, the philosophy and the conception of life of the rest of the world will not permit us to indulge in compromises intended to achieve the objectives of communism.",
+    options: [
+      { text: "共产主义意识形态",     correct: true  },
+      { text: "共产主义的政治信仰与原则", correct: true  },
+      { text: "资本主义自由市场理论", correct: false },
+      { text: "民主宪政制度框架",     correct: false },
+      { text: "宗教神学思想体系",     correct: false }
+    ]
+  },
+  {
+    word: "geopolitics",
+    pos: "n.",
+    sentence: "Nuclear proliferation could be the way of the future, as geopolitics reshapes alliances and power balances across the globe.",
+    options: [
+      { text: "地缘政治（地理与政治的相互影响研究）", correct: true  },
+      { text: "人口学（人口分布与变迁研究）",         correct: false },
+      { text: "生态学（生物与环境关系研究）",         correct: false }
+    ]
+  },
+  {
+    word: "geography",
+    pos: "n.",
+    sentence: "It is an analysis of the relations of land and sea to people and what they do — this means economic geography, no less than political.",
+    options: [
+      { text: "地理学（研究地球物理特征与人类活动）", correct: true  },
+      { text: "历史学（研究人类历史与文明演变）",     correct: false },
+      { text: "社会学（研究社会结构与群体行为）",     correct: false }
+    ]
+  },
+  {
+    word: "stark",
+    pos: "adj.",
+    sentence: "Lawmakers invited people affected by the immigration crackdown to the State of the Union address, in a stark visual reminder of the deep divide over an issue that has inflamed partisan tensions.",
+    options: [
+      { text: "鲜明的、严酷的、彻底的", correct: true  },
+      { text: "模糊的、含混的",           correct: false },
+      { text: "温和的、轻微的",           correct: false }
+    ]
+  },
+  {
+    word: "duplication",
+    pos: "n.",
+    sentence: "Today, I'd like to consider the single largest source of new genes: duplication.",
+    options: [
+      { text: "复制、重复（制作精确副本的过程）", correct: true  },
+      { text: "变异、突变（基因随机改变）",       correct: false },
+      { text: "删除、消除（移除某部分的过程）",   correct: false }
+    ]
+  },
+  {
+    word: "lobby",
+    pos: "n.",
+    sentence: "If you've never visited the surreal, Egyptian-columned marble landscape that is the 60 Wall Street lobby atrium, now may be your last chance.",
+    options: [
+      { text: "大厅（建筑入口处）；游说团体", correct: true  },
+      { text: "阳台（建筑外部露台）",          correct: false  },
+      { text: "地下室（建筑地下空间）",         correct: false },
+      { text: "屋顶（建筑顶部平台）",           correct: false },
+      { text: "走廊（建筑内部通道）",           correct: false }
+    ]
+  },
+  {
+    word: "to say nothing of",
+    pos: "idiom",
+    sentence: "The journey was exhausting and expensive, to say nothing of the dangers we faced along the way.",
+    options: [
+      { text: "更不用说……；还不算……",     correct: true  },
+      { text: "尽管如此；但话又说回来", correct: false },
+      { text: "换句话说；也就是说",     correct: false }
+    ]
+  }
+
+];
+
+// =================================================================
+// 段位
+// =================================================================
+const RANKS = [
+  {min:3000,label:"🌟 传说"},{min:1500,label:"👑 大师"},
+  {min:700, label:"⚡ 达人"},{min:300, label:"🔥 学者"},
+  {min:100, label:"📖 学徒"},{min:0,   label:"🌱 新芽"}
+];
+
+// =================================================================
+// 持久化
+// =================================================================
+const LS={
+  get:k=>{try{return JSON.parse(localStorage.getItem('wordslots_'+k));}catch(e){return null;}},
+  set:(k,v)=>{try{localStorage.setItem('wordslots_'+k,JSON.stringify(v));}catch(e){}}
+};
+const todayKey=new Date().toISOString().slice(0,10);
+
+// =================================================================
+// 游戏状态
+// =================================================================
+let score         = LS.get('score')            || 0;
+let bestCombo     = LS.get('bestCombo')        || 0;
+let todayData     = LS.get('today_'+todayKey)  || {total:0,correct:0};
+let combo         = 0;
+let spinning      = false;
+let answeredCount = 0;
+let totalQs       = 0;
+let currentQs     = [];
+
+// =================================================================
+// Web Audio
+// =================================================================
+let audioCtx=null;
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,type,dur,vol,freqEnd){
+  try{
+    const ctx=getAudio(),osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.connect(g);g.connect(ctx.destination);
+    osc.type=type;
+    osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    if(freqEnd) osc.frequency.exponentialRampToValueAtTime(freqEnd,ctx.currentTime+dur);
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function soundCorrect(){
+  playTone(440,'sine',0.12,0.3,660);
+  setTimeout(()=>playTone(880,'sine',0.18,0.25),110);
+  setTimeout(()=>playTone(1100,'sine',0.15,0.18),220);
+}
+function soundWrong(){
+  playTone(320,'sawtooth',0.1,0.28,160);
+  setTimeout(()=>playTone(160,'sawtooth',0.22,0.22,80),110);
+}
+function soundComboUp(){
+  playTone(660,'sine',0.08,0.18,1000);
+}
+function soundCrit(){
+  playTone(523,'sine',0.15,0.3);
+  setTimeout(()=>playTone(659,'sine',0.15,0.3),80);
+  setTimeout(()=>playTone(784,'sine',0.2,0.35),160);
+  setTimeout(()=>playTone(1046,'sine',0.3,0.45),260);
+}
+
+// =================================================================
+// UI
+// =================================================================
+function getRank(s){for(const r of RANKS)if(s>=r.min)return r.label;return RANKS[RANKS.length-1].label;}
+function updateUI(){
+  document.getElementById('scoreVal').textContent     = score;
+  document.getElementById('comboVal').textContent     = combo;
+  document.getElementById('rankBadge').textContent    = getRank(score);
+  document.getElementById('bestComboVal').textContent = bestCombo;
+  document.getElementById('todayTotal').textContent   = todayData.total;
+  document.getElementById('todayCorrect').textContent = todayData.correct;
+  const rate = todayData.total>0 ? Math.round(todayData.correct/todayData.total*100)+'%' : '-';
+  document.getElementById('todayRate').textContent    = rate;
+}
+function showCombo(){
+  const el=document.getElementById('comboText');
+  if(combo<2){el.classList.remove('show');return;}
+  el.textContent='COMBO ×'+combo;
+  el.classList.remove('bounce');void el.offsetWidth;
+  el.classList.add('show','bounce');
+}
+function flash(type){
+  const el=document.getElementById('flashOverlay');
+  el.className='flash-overlay';void el.offsetWidth;
+  el.className='flash-overlay '+type;
+}
+function showScorePopup(delta,isCrit){
+  const el=document.createElement('div');
+  el.className='score-popup';
+  el.textContent=(delta>0?'+':'')+delta+(isCrit?' 🎰':'');
+  el.style.cssText=`left:50%;top:38%;color:${delta>0?'var(--correct)':'var(--wrong)'};`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1400);
+}
+function showCritLabel(){
+  const el=document.createElement('div');
+  el.className='crit-label';el.textContent='CRITICAL!';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+// =================================================================
+// 老虎机
+// =================================================================
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function buildReel(reelEl,allWords,chosenWord){
+  reelEl.innerHTML='';
+  reelEl.style.transition='none';
+  const others=allWords.filter(w=>w!==chosenWord);
+  const pad=()=>others.length>0?others[Math.floor(Math.random()*others.length)]:chosenWord;
+  const items=[pad(),pad(),pad(),chosenWord,pad(),pad(),pad()];
+  items.forEach((w,i)=>{
+    const d=document.createElement('div');
+    d.className='reel-item'+(i===3?' chosen':'');
+    d.textContent=w.word;
+    reelEl.appendChild(d);
+  });
+  reelEl.style.transform='translateY(0)';
+}
+function spinReel(reelEl,stopDelay,cb){
+  reelEl.style.transition='none';
+  reelEl.style.transform='translateY(0)';
+  reelEl.classList.add('spinning');
+  setTimeout(()=>{
+    reelEl.classList.remove('spinning');
+    reelEl.style.transition='transform 0.55s cubic-bezier(0.17,0.67,0.35,1.3)';
+    reelEl.style.transform='translateY(-264px)';
+    // 用 setTimeout 保底，不依赖 transitionend
+    setTimeout(()=>{ if(cb)cb(); }, 600);
+  },stopDelay);
+}
+
+// =================================================================
+// 出题
+// =================================================================
+function buildQuestion(wordObj){
+  const correctCount=wordObj.options.filter(o=>o.correct).length;
+  const isMulti=correctCount>1;
+  // 随机决定题型：A=直接显示单词，B=显示例句
+  const type=Math.random()<0.5?'A':'B';
+  const opts=shuffle([...wordObj.options]);
+  return {wordObj,type,opts,isMulti};
+}
+
+// =================================================================
+// 渲染题目
+// =================================================================
+function renderQuestion(q,qidx){
+  const card=document.getElementById('qcard'+qidx);
+  const labels=['A','B','C','D','E'];
+  let html='';
+
+  // 题型标签
+  if(q.isMulti){
+    html+='<span class="q-type-badge multi">多选题 — 选出所有正确项（多选/少选/错选均扣分）</span>';
+  } else {
+    html+='<span class="q-type-badge">单选题</span>';
+  }
+
+  // 题目
+  if(q.type==='A'){
+    html+=`<span class="q-word">${q.wordObj.word}</span>`;
+    html+=`<span class="q-pos">${q.wordObj.pos}</span>`;
+    html+='<div class="q-prompt">这个单词的含义是？</div>';
+  } else {
+    const hl=q.wordObj.sentence.replace(
+      new RegExp('\\b'+q.wordObj.word+'\\b','i'),
+      m=>`<span class="hl">${m}</span>`
+    );
+    html+=`<div class="q-sentence">${hl}</div>`;
+    html+='<div class="q-prompt">句中高亮单词的含义是？</div>';
+  }
+
+  // 选项
+  html+='<div class="options">';
+  q.opts.forEach((opt,i)=>{
+    html+=`<button class="option-btn" data-idx="${i}" onclick="selectOption(this,${qidx},${i})">`;
+    html+=`<span class="opt-label">${labels[i]}</span>${opt.text}</button>`;
+  });
+  html+='</div>';
+
+  // 多选提交
+  if(q.isMulti){
+    html+=`<button class="submit-multi" id="submitBtn${qidx}" onclick="submitMulti(${qidx})">确认提交</button>`;
+  }
+
+  // 结果区
+  html+=`<div class="q-result" id="result${qidx}"><span class="msg"></span><span class="score-delta"></span></div>`;
+
+  card.innerHTML=html;
+}
+
+// =================================================================
+// 答题交互
+// =================================================================
+function selectOption(btn,qidx,optIdx){
+  const q=currentQs[qidx];
+  if(q.answered)return;
+  if(!q.isMulti){
+    btn.closest('.options').querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    judgeQuestion(qidx,[optIdx]);
+  } else {
+    btn.classList.toggle('selected');
+  }
+}
+
+function submitMulti(qidx){
+  const q=currentQs[qidx];
+  if(q.answered)return;
+  const card=document.getElementById('qcard'+qidx);
+  const selected=[...card.querySelectorAll('.option-btn.selected')].map(b=>parseInt(b.dataset.idx));
+  if(selected.length===0){alert('请至少选择一项');return;}
+  judgeQuestion(qidx,selected);
+}
+
+function judgeQuestion(qidx,selectedIdxs){
+  const q=currentQs[qidx];
+  q.answered=true;
+  const card=document.getElementById('qcard'+qidx);
+  const btns=card.querySelectorAll('.option-btn');
+  const submitBtn=document.getElementById('submitBtn'+qidx);
+  if(submitBtn)submitBtn.disabled=true;
+  btns.forEach(b=>b.disabled=true);
+
+  // 判断正误
+  const correctIdxs=q.opts.map((o,i)=>o.correct?i:-1).filter(i=>i>=0);
+  const selectedSet=new Set(selectedIdxs);
+  const correctSet=new Set(correctIdxs);
+  const isCorrect=selectedSet.size===correctSet.size&&[...correctSet].every(i=>selectedSet.has(i));
+
+  // 标色
+  btns.forEach((b,i)=>{
+    if(correctSet.has(i))b.classList.add('correct');
+    else if(selectedSet.has(i))b.classList.add('wrong');
+  });
+
+  // 积分
+  let isCrit=false,delta;
+  if(isCorrect){
+    combo++;
+    if(combo>bestCombo){bestCombo=combo;LS.set('bestCombo',bestCombo);}
+    const mult=Math.min(combo,4);
+    delta=10*mult;
+    isCrit=Math.random()<0.15;
+    if(isCrit)delta*=2;
+    score+=delta;
+    todayData.correct++;
+    LS.set('score',score);
+    if(isCrit){soundCrit();showCritLabel();flash('crit-flash');}
+    else{soundCorrect();flash('correct-flash');}
+    if(combo>=2)soundComboUp();
+    card.classList.add('answered-correct');
+  } else {
+    const penalty=5*Math.min(Math.max(combo,1),4);
+    delta=-penalty;
+    score=Math.max(0,score+delta);
+    combo=0;
+    LS.set('score',score);
+    soundWrong();flash('wrong-flash');
+    card.classList.add('answered-wrong');
+    card.classList.add('shake');
+    setTimeout(()=>card.classList.remove('shake'),500);
+  }
+  todayData.total++;
+  LS.set('today_'+todayKey,todayData);
+
+  // 显示反馈
+  const resultEl=document.getElementById('result'+qidx);
+  resultEl.classList.add('show',isCorrect?'correct-fb':'wrong-fb');
+  resultEl.querySelector('.msg').textContent=isCorrect
+    ?(isCrit?'🎰 暴击！完全正确！':'✓ 正确！')+(combo>=2?' COMBO ×'+combo:'')
+    :'✗ 错误，正确选项已标绿';
+  resultEl.querySelector('.score-delta').textContent=(delta>0?'+':'')+delta;
+  showScorePopup(delta,isCrit);
+  showCombo();
+  updateUI();
+
+  answeredCount++;
+  if(answeredCount>=totalQs){
+    setTimeout(()=>document.getElementById('spinBtn').disabled=false,600);
+  }
+}
+
+// =================================================================
+// SPIN
+// =================================================================
+function spin(){
+  if(spinning)return;
+  if(WORD_BANK.length<3){alert('单词库至少需要3个单词！');return;}
+  spinning=true;
+  answeredCount=0;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('questionsArea').innerHTML='';
+
+  const picked=shuffle(WORD_BANK).slice(0,3);
+  currentQs=picked.map(w=>buildQuestion(w));
+  totalQs=currentQs.length;
+
+  picked.forEach((word,i)=>{
+    const reel=document.getElementById('reel'+i);
+    buildReel(reel,WORD_BANK,word);
+    spinReel(reel,1200+(i*600),i===2?()=>showQuestions():null);
+  });
+}
+
+function showQuestions(){
+  spinning=false;
+  const area=document.getElementById('questionsArea');
+  currentQs.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='q-card';
+    card.id='qcard'+i;
+    card.dataset.qidx=i;
+    area.appendChild(card);
+    renderQuestion(q,i);
+  });
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth',block:'start'}),400);
+}
+
+// =================================================================
+// 初始化
+// =================================================================
+(function init(){
+  [0,1,2].forEach(i=>{
+    const reel=document.getElementById('reel'+i);
+    const w=WORD_BANK[i%WORD_BANK.length];
+    buildReel(reel,WORD_BANK,w);
+    reel.style.transform='translateY(-264px)';
+  });
+  updateUI();
+})();
+</script>
+</body>
+</html>
