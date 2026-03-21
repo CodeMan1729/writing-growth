@@ -183,6 +183,47 @@ body{
 }
 .q-sentence .hl{color:var(--accent);font-style:normal;font-weight:700;text-decoration:underline;text-decoration-color:rgba(245,197,24,0.4)}
 
+/* 自测模式 */
+.self-test-word{font-family:var(--font-mono);font-size:2.2rem;color:var(--accent);letter-spacing:0.08em;display:block;margin-bottom:4px;text-transform:lowercase;text-align:center;padding:18px 0 6px}
+.self-test-pos{font-family:var(--font-mono);font-size:0.8rem;color:var(--text-dim);display:block;text-align:center;margin-bottom:20px}
+.self-test-hint{text-align:center;font-size:0.85rem;color:var(--text-dim);font-family:var(--font-mono);margin-bottom:12px;letter-spacing:0.06em}
+.reveal-mask{
+  position:relative;border-radius:8px;overflow:hidden;
+  background:var(--surface2);border:1px dashed var(--border);
+  padding:18px 24px;margin-bottom:18px;cursor:pointer;
+  transition:border-color 0.2s;
+  user-select:none;
+}
+.reveal-mask:hover{border-color:var(--accent)}
+.reveal-mask .mask-cover{
+  position:absolute;inset:0;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;transition:opacity 0.35s;
+  font-family:var(--font-mono);font-size:0.82rem;
+  color:var(--text-dim);letter-spacing:0.1em;
+  backdrop-filter:blur(2px);
+}
+.reveal-mask .mask-cover.hidden{opacity:0;pointer-events:none}
+.reveal-mask .meaning-content{
+  font-size:1.05rem;line-height:1.8;color:var(--text);
+  opacity:0;transition:opacity 0.35s;
+}
+.reveal-mask .meaning-content.visible{opacity:1}
+.meaning-item{display:flex;align-items:baseline;gap:8px;padding:2px 0}
+.meaning-item .m-label{font-family:var(--font-mono);font-size:0.72rem;color:var(--correct);min-width:14px}
+.self-judge-btns{display:flex;gap:12px;margin-top:4px}
+.self-judge-btns button{
+  flex:1;padding:11px 0;border:none;border-radius:8px;
+  font-family:var(--font-display);font-size:1.3rem;letter-spacing:0.15em;
+  cursor:pointer;transition:transform 0.12s,opacity 0.12s;
+  opacity:0;pointer-events:none;transition:opacity 0.3s,transform 0.12s;
+}
+.self-judge-btns button.active{opacity:1;pointer-events:auto}
+.self-judge-btns .btn-correct-self{background:var(--correct);color:#0d0d0f}
+.self-judge-btns .btn-wrong-self{background:var(--wrong);color:#fff}
+.self-judge-btns button:hover{transform:translateY(-2px)}
+.self-judge-btns button:active{transform:translateY(1px)}
+
 .options{display:flex;flex-direction:column;gap:8px}
 .option-btn{
   width:100%;text-align:left;padding:11px 16px;
@@ -315,6 +356,120 @@ body{
 // =================================================================
 const WORD_BANK = [
   {
+    word: "only if",
+    pos: "conj. phrase",
+    sentence: "Although countless aspiring authors dream of instant fame upon completing their first draft, true literary success comes only if they embrace rigorous self-editing and seek constructive criticism from mentors, principles that Stephen King passionately advocates in his renowned writing course materials.",
+    options: [
+      { text: "如果……就……（只有在……条件下才）", correct: true  },
+      { text: "即使……也……",                     correct: false },
+      { text: "不但……而且……",                   correct: false }
+    ]
+  },
+  {
+    word: "permit",
+    pos: "v./n.",
+    sentence: "The publishing house’s strict editorial guidelines do not permit any participant in the workshop to submit a manuscript without first undergoing multiple rounds of peer review, a process that often uncovers subtle inconsistencies in plot and character motivation which could otherwise derail an otherwise promising narrative arc.",
+    options: [
+      { text: "允许；许可",   correct: true  },
+      { text: "许可证；许可", correct: true  },
+      { text: "拒绝；阻止",   correct: false },
+      { text: "惩罚；制裁",   correct: false },
+      { text: "夸耀；炫耀",   correct: false }
+    ]
+  },
+  {
+    word: "clip",
+    pos: "v./n.",
+    sentence: "In the age of digital research, experienced nonfiction writers often clip the most pertinent paragraphs from lengthy online articles and weave them into their own drafts with seamless transitions, yet they must always verify sources meticulously to avoid any ethical lapses that might undermine the credibility of their entire body of work.",
+    options: [
+      { text: "剪辑；修剪；快速移动", correct: true  },
+      { text: "片段；剪报；夹子",     correct: true  },
+      { text: "长期拖延",             correct: false },
+      { text: "大声朗读",             correct: false },
+      { text: "完全忽略",             correct: false }
+    ]
+  },
+  {
+    word: "printout",
+    pos: "n.",
+    sentence: "After hours of staring at a glowing screen filled with tracked changes and comments, the meticulous novelist always requests a fresh printout of the revised chapters so that she can mark up awkward phrasing and abrupt transitions with a red pen, revealing flaws in pacing that digital tools alone fail to highlight.",
+    options: [
+      { text: "打印件",     correct: true  },
+      { text: "手写草稿",   correct: false },
+      { text: "语音记录",   correct: false }
+    ]
+  },
+  {
+    word: "chauvinistic",
+    pos: "adj.",
+    sentence: "Modern literary critics frequently observe that several classic adventure novels from the early twentieth century display a chauvinistic attitude toward female supporting characters, which contemporary authors are now deliberately revising through more balanced portrayals that enhance thematic depth and appeal to a broader, more inclusive global readership.",
+    options: [
+      { text: "大男子主义的；盲目偏执的", correct: true  },
+      { text: "平等包容的",               correct: false },
+      { text: "谦逊克制的",               correct: false }
+    ]
+  },
+  {
+    word: "drop a paragraph",
+    pos: "v. phrase",
+    sentence: "During the intensive revision stage recommended by writing masters, it sometimes becomes essential to drop a paragraph that, although rich in descriptive detail, fails to advance the central conflict or deepen character relationships, thereby tightening the overall structure and preventing the story from losing momentum in the eyes of impatient readers.",
+    options: [
+      { text: "删除一段；省略一段（编辑语境）", correct: true  },
+      { text: "扩写一段并添加细节",             correct: false },
+      { text: "逐字背诵整段内容",               correct: false }
+    ]
+  },
+  {
+    word: "abrupt transition",
+    pos: "n. phrase",
+    sentence: "One of the most common pitfalls faced by novice storytellers is an abrupt transition between major scenes that leaves readers momentarily disoriented and breaks the immersive flow, a flaw that can be elegantly corrected by inserting subtle foreshadowing phrases as advised in advanced creative writing courses focused on narrative continuity.",
+    options: [
+      { text: "突兀的过渡；突然的转变", correct: true  },
+      { text: "自然流畅的衔接",         correct: false },
+      { text: "重复赘述的开头",         correct: false }
+    ]
+  },
+  {
+    word: "awkward",
+    pos: "adj.",
+    sentence: "Crafting an effective opening paragraph often feels particularly awkward for beginning writers who are still searching for their authentic voice, yet through repeated practice and feedback from seasoned mentors in online writing communities, they gradually transform those stiff sentences into compelling hooks that draw readers in from the very first line and sustain engagement across the entire manuscript.",
+    options: [
+      { text: "尴尬的；笨拙的；不自然的", correct: true  },
+      { text: "优雅流畅的",               correct: false },
+      { text: "极其简洁的",               correct: false }
+    ]
+  },
+  {
+    word: "prudent",
+    pos: "adj.",
+    sentence: "It is always prudent for any serious writer to prepare a detailed outline before committing words to the page, since this cautious preliminary step helps foresee potential plot holes and thematic inconsistencies that might otherwise require painful major rewrites once the first draft has already grown to hundreds of pages.",
+    options: [
+      { text: "谨慎的；明智的；审慎的", correct: true  },
+      { text: "轻率冲动的",               correct: false },
+      { text: "迟钝麻木的",               correct: false }
+    ]
+  },
+  {
+    word: "tentative",
+    pos: "adj.",
+    sentence: "The young author’s tentative experiments with shifting points of view in her second novel initially received cautious feedback from her editor, but after several collaborative sessions that refined the technique, those hesitant structural choices evolved into a sophisticated narrative device that heightened suspense and emotional resonance without ever confusing the audience.",
+    options: [
+      { text: "试探性的；犹豫不决的；暂时的", correct: true  },
+      { text: "坚定不移的",                   correct: false },
+      { text: "最终定稿的",                   correct: false }
+    ]
+  },
+  {
+    word: "crabbed",
+    pos: "adj.",
+    sentence: "The veteran editor’s crabbed handwriting in the margin notes he scribbled across the printed manuscript pages made it a real challenge for the junior assistant to decipher every critical comment on dialogue pacing and scene transitions, yet those painstakingly decoded insights ultimately helped transform the rough draft into a polished work that earned widespread acclaim in literary circles.",
+    options: [
+      { text: "脾气暴躁的；（字迹）潦草难读的；难懂的", correct: true  },
+      { text: "清晰工整的",                               correct: false },
+      { text: "温和友善的",                               correct: false }
+    ]
+  },
+  {
     word: "ephemeral",
     pos: "adj.",
     sentence: "The ephemeral beauty of cherry blossoms makes them all the more precious.",
@@ -426,7 +581,7 @@ const WORD_BANK = [
   {
     word: "soar",
     pos: "v.",
-    sentence: "As wages increased and the cost of raw ingredients soared, food companies started passing along those expenses to customers.",
+    sentence: "As wages increased and the cost of raw ingredients soared(soar), food companies started passing along those expenses to customers.",
     options: [
       { text: "快速上升、飙升",     correct: true  },
       { text: "急剧下降、暴跌",     correct: false },
@@ -498,7 +653,7 @@ const WORD_BANK = [
   {
     word: "fork over",
     pos: "phrasal v.",
-    sentence: "The latest action compels the city to turn over an additional $106 million.",
+    sentence: " My coffee maker broke on a Monday morning — I had no choice but to fork over $6 for a latte I didn't even enjoy.",
     options: [
       { text: "不情愿地支付、交出", correct: true  },
       { text: "拒绝交出、扣留",     correct: false },
@@ -600,6 +755,336 @@ const WORD_BANK = [
       { text: "尽管如此；但话又说回来", correct: false },
       { text: "换句话说；也就是说",     correct: false }
     ]
+  },
+  {
+    word: "sue",
+    pos: "v.",
+    sentence: "A coalition of 24 states, along with a dozen cities and counties, sued the Trump administration on Thursday over its decision to relinquish the government's legal authority to fight climate change.",
+    options: [
+      { text: "起诉；控告", correct: true  },
+      { text: "辩护；为……辩解", correct: false },
+      { text: "撤销；取消", correct: false }
+    ]
+  },
+  {
+    word: "akin",
+    pos: "adj.",
+    sentence: "The experience of losing a language is akin to losing a part of one's identity.",
+    options: [
+      { text: "类似的；相似的", correct: true  },
+      { text: "相反的；对立的", correct: false },
+      { text: "陌生的；无关的", correct: false }
+    ]
+  },
+  {
+    word: "dock",
+    pos: "n.",
+    sentence: "If your computer has Thunderbolt ports, a Thunderbolt dock is faster and more versatile than a USB hub.",
+    options: [
+      { text: "停靠站；连接设备（扩展坞）", correct: true  },
+      { text: "充电器；电源适配器", correct: false },
+      { text: "显示器；屏幕", correct: false }
+    ]
+  },
+  {
+    word: "lure",
+    pos: "v.",
+    sentence: "Drug Rehabs Lure In Patients for Insurance Money—Then Leave Them on the Street.",
+    options: [
+      { text: "诱惑；吸引", correct: true  },
+      { text: "警告；告诫", correct: false },
+      { text: "拒绝；驱逐", correct: false }
+    ]
+  },
+  {
+    word: "suit",
+    pos: "n.",
+    sentence: "Whether this is your first men's suit or you're looking to build your collection, we found 12 outstanding options for a range of tastes and budgets.",
+    options: [
+      { text: "套装；西服", correct: true  },
+      { text: "诉讼案件", correct: false },
+      { text: "扑克花色", correct: false }
+    ]
+  },
+  {
+    word: "toll",
+    pos: "n.",
+    sentence: "Toll roads also use 'pay by plate' systems, which snap a photo of your license plate if you don't have a device.",
+    options: [
+      { text: "通行费", correct: true  },
+      { text: "代价；损失", correct: true  },
+      { text: "税收；国家收入", correct: false },
+      { text: "罚款；处罚", correct: false },
+      { text: "奖励；补贴", correct: false }
+    ]
+  },
+  {
+    word: "cease",
+    pos: "v.",
+    sentence: "The company announced it would cease all operations in the region by the end of the year.",
+    options: [
+      { text: "停止；终止", correct: true  },
+      { text: "加速；推进", correct: false },
+      { text: "延续；维持", correct: false }
+    ]
+  },
+  {
+    word: "wager",
+    pos: "v./n.",
+    sentence: "On Manifold Markets, users can create a market on any topic and invite other users to wager on it.",
+    options: [
+      { text: "打赌；下注；赌金", correct: true  },
+      { text: "拒绝；回避", correct: false },
+      { text: "投资；储蓄", correct: false }
+    ]
+  },
+  {
+    word: "coupon",
+    pos: "n.",
+    sentence: "At Walmart, ShopRite and Target, consumers in the same household can no longer redeem more than four of the same paper coupon in a day.",
+    options: [
+      { text: "优惠券；票券", correct: true  },
+      { text: "收据；发票", correct: false },
+      { text: "积分；奖励点", correct: false }
+    ]
+  },
+  {
+    word: "degree",
+    pos: "n.",
+    sentence: "But more than a third of students seeking a bachelor's degree still were not finishing within six years.",
+    options: [
+      { text: "学位", correct: true  },
+      { text: "程度；级别", correct: true  },
+      { text: "温度单位", correct: true },
+      { text: "荣誉称号", correct: false },
+      { text: "考试成绩", correct: false }
+    ]
+  },
+  {
+    word: "ground",
+    pos: "adj./n.",
+    sentence: "Ground beef is really hard to beat as far as bang for the buck goes.",
+    options: [
+      { text: "绞碎的（如 ground beef）", correct: true  },
+      { text: "地面；土地", correct: true  },
+      { text: "空中的；高处的", correct: false },
+      { text: "理由", correct: false },
+      { text: "冷冻的；保存的", correct: false }
+    ]
+  },
+  {
+    word: "heroin",
+    pos: "n.",
+    sentence: "As heroin use soars, people are routinely being found unconscious in public places like the bathrooms of fast-food restaurants.",
+    options: [
+      { text: "海洛因（一种强成瘾性毒品）", correct: true  },
+      { text: "止痛药；处方药", correct: false },
+      { text: "镇静剂；安眠药", correct: false }
+    ]
+  },
+  {
+    word: "pepper",
+    pos: "n.",
+    sentence: "Black Pepper Stir-Fried Tofu and Asparagus.",
+    options: [
+      { text: "胡椒；辣椒", correct: true  },
+      { text: "盐；调味料（统称）", correct: false },
+      { text: "酱汁；佐料", correct: false }
+    ]
+  },
+  {
+    word: "thrill",
+    pos: "n.",
+    sentence: "Transit officials say the culprits are thrill seekers who commandeer empty trains for joy rides.",
+    options: [
+      { text: "刺激；兴奋感", correct: true  },
+      { text: "恐惧；惊吓", correct: false },
+      { text: "无聊；倦怠", correct: false }
+    ]
+  },
+  {
+    word: "auditor",
+    pos: "n.",
+    sentence: "The S.E.C. suit says Dewey officials 'expressed occasional concern that the auditor would detect their fraudulent accounting practices.'",
+    options: [
+      { text: "审计员；审核人", correct: true  },
+      { text: "律师；法律顾问", correct: false },
+      { text: "调查员；侦探", correct: false }
+    ]
+  },
+  {
+    word: "counsel",
+    pos: "n.",
+    sentence: "A special counsel is a semi-independent federal prosecutor.",
+    options: [
+      { text: "律师", correct: true  },
+      { text: "忠告", correct: true  },
+      { text: "v.给 ...提供建议", correct: false },
+      { text: "法官；裁判", correct: false },
+      { text: "证人；目击者", correct: false }
+    ]
+  },
+  {
+    word: "lottery",
+    pos: "n.",
+    sentence: "Past lottery winners have had a few.",
+    options: [
+      { text: "彩票；抽奖", correct: true  },
+      { text: "赌博；赌场", correct: false },
+      { text: "竞赛；比赛", correct: false }
+    ]
+  },
+  {
+    word: "weakness of will",
+    pos: "phrase",
+    sentence: "It is an elegant theory, as it makes no use of the thorny notion of akrasia, or weakness of will.",
+    options: [
+      { text: "意志薄弱；缺乏自控力", correct: true  },
+      { text: "意志坚定；自律极强", correct: false },
+      { text: "优柔寡断；拖延症", correct: false }
+    ]
+  },
+  {
+    word: "distract",
+    pos: "v.",
+    sentence: "How to Distract Your Kid Into Paying Attention.",
+    options: [
+      { text: "分散注意力；使分心", correct: true  },
+      { text: "集中注意力；使专注", correct: false },
+      { text: "激励；鼓励", correct: false }
+    ]
+  },
+  {
+    word: "promoter",
+    pos: "n.",
+    sentence: "A promoter can't staff the fight night venue alone.",
+    options: [
+      { text: "推广者；活动发起人", correct: true  },
+      { text: "反对者；阻挠者", correct: false },
+      { text: "赞助商；出资方", correct: false }
+    ]
+  },
+  {
+    word: "conductive",
+    pos: "adj.",
+    sentence: "Glass coffee makers that require no stove or hot plate are the result of the development of new electrically conductive coatings.",
+    options: [
+      { text: "导电的；传导的", correct: true  },
+      { text: "绝缘的；隔热的", correct: false },
+      { text: "透明的；光滑的", correct: false }
+    ]
+  },
+  {
+    word: "engage in",
+    pos: "phrase",
+    sentence: "A slim and vital book identifying the slippery arguments that pretend to engage in democratic deliberation, even as they strangle it.",
+    options: [
+      { text: "从事；参与（某项活动）", correct: true  },
+      { text: "退出；放弃", correct: false },
+      { text: "反对；抵制", correct: false }
+    ]
+  },
+  {
+    word: "operative",
+    pos: "n.",
+    sentence: "The intrigue begins when Thomas receives an unexpected call from Rachel, a former operative he used to handle.",
+    options: [
+      { text: "特工；秘密行动人员", correct: true  },
+      { text: "操作员；技术工人", correct: true  },
+      { text: "指挥官；将领", correct: false },
+      { text: "外交官；使节", correct: false },
+      { text: "律师；检察官", correct: false }
+    ]
+  },
+  {
+    word: "pathology",
+    pos: "n.",
+    sentence: "Becoming head of the pathology department at its College of Medicine.",
+    options: [
+      { text: "病理学（研究疾病的学科）", correct: true  },
+      { text: "病态；异常状况", correct: true  },
+      { text: "药理学（研究药物的学科）", correct: false },
+      { text: "心理学（研究心理的学科）", correct: false },
+      { text: "生理学（研究生命功能的学科）", correct: false }
+    ]
+  },
+  {
+    word: "patronage",
+    pos: "n.",
+    sentence: "Editorial on Eisenhower order on 134000 jobs, deplores patronage pressures.",
+    options: [
+      { text: "赞助；支持; 保护", correct: true  },
+      { text: "政治任用；裙带关系", correct: false  },
+      { text: "批评；反对", correct: false },
+      { text: "竞争；对抗", correct: false },
+      { text: "改革；革新", correct: false }
+    ]
+  },
+  {
+    word: "patronize",
+    pos: "v.",
+    sentence: "Can I Patronize a Place Run by a Trump Supporter?",
+    options: [
+      { text: "光顾；惠顾（作为顾客）", correct: true  },
+      { text: "资助，保护", correct: true  },
+      { text: "抵制；拒绝消费", correct: false },
+      { text: "举报；投诉", correct: false },
+      { text: "赞美；称赞", correct: false }
+    ]
+  },
+  {
+    word: "recurrent",
+    pos: "adj.",
+    sentence: "The overwhelming majority of recurrent miscarriages occur because something is wrong with the baby.",
+    options: [
+      { text: "反复发生的；复发的", correct: true  },
+      { text: "偶发的；罕见的", correct: false },
+      { text: "首次出现的；初发的", correct: false }
+    ]
+  },
+  {
+    word: "comprehensive",
+    pos: "adj.",
+    sentence: "A comprehensive financial plan considers every aspect of your financial life.",
+    options: [
+      { text: "全面的；综合的", correct: true  },
+      { text: "片面的；局部的", correct: false },
+      { text: "简短的；概括的", correct: false }
+    ]
+  },
+  {
+    word: "cancelling",
+    pos: "v./adj.",
+    sentence: "Active-noise-cancelling headphones use tiny microphones on the inside to process the sound headed toward your ears.",
+    options: [
+      { text: "取消；抵消", correct: true  },
+      { text: "（noise-cancelling）降噪的", correct: true  },
+      { text: "放大；增强", correct: false },
+      { text: "延迟；推迟", correct: false },
+      { text: "传播；扩散", correct: false }
+    ]
+  },
+  {
+    word: "nevertheless",
+    pos: "adv.",
+    sentence: "Nevertheless, the title comes from a dirty joke that Baldwin heard from the British actor Michael Gambon.",
+    options: [
+      { text: "然而；尽管如此", correct: true  },
+      { text: "因此；所以", correct: false },
+      { text: "此外；另外", correct: false }
+    ]
+  },
+  {
+    word: "windfall",
+    pos: "n.",
+    sentence: "The M.T.A. Is Counting on a Casino Windfall.",
+    options: [
+      { text: "意外之财；意外收获", correct: true  },
+      { text: "被风吹落的果子（windfall 本义）", correct: true  },
+      { text: "预期收入；计划预算", correct: false },
+      { text: "重大损失；意外亏损", correct: false },
+      { text: "稳定收益；固定分红", correct: false }
+    ]
   }
 
 ];
@@ -625,7 +1110,7 @@ const todayKey=new Date().toISOString().slice(0,10);
 // =================================================================
 // 游戏状态
 // =================================================================
-let score         = LS.get('score')            || 0;
+let score         = LS.get('score_'+todayKey)  || 0;
 let bestCombo     = LS.get('bestCombo')        || 0;
 let todayData     = LS.get('today_'+todayKey)  || {total:0,correct:0};
 let combo         = 0;
@@ -671,6 +1156,91 @@ function soundCrit(){
   setTimeout(()=>playTone(659,'sine',0.15,0.3),80);
   setTimeout(()=>playTone(784,'sine',0.2,0.35),160);
   setTimeout(()=>playTone(1046,'sine',0.3,0.45),260);
+}
+// 机械枪械音效
+let reelTickInterval=null;
+let reelTickRunning=false;
+function soundReelStart(){
+  // 先确保上一次彻底停止
+  reelTickRunning=false;
+  reelTickInterval && clearTimeout(reelTickInterval);
+  reelTickInterval=null;
+
+  let tickCount=0;
+  reelTickRunning=true;
+
+  function tick(){
+    if(!reelTickRunning) return;
+    try{
+      const ctx=getAudio();
+      const bufSize=Math.floor(ctx.sampleRate*0.03);
+      const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+      const data=buf.getChannelData(0);
+      for(let i=0;i<bufSize;i++) data[i]=(Math.random()*2-1);
+      const src=ctx.createBufferSource();
+      src.buffer=buf;
+      const bpf=ctx.createBiquadFilter();
+      bpf.type='bandpass';
+      bpf.frequency.value=3500+Math.random()*800;
+      bpf.Q.value=1.2;
+      const g=ctx.createGain();
+      src.connect(bpf);bpf.connect(g);g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.22,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.03);
+      src.start(ctx.currentTime);src.stop(ctx.currentTime+0.03);
+    }catch(e){}
+    tickCount++;
+    let interval;
+    if(tickCount<6)       interval=42;
+    else if(tickCount<15) interval=58;
+    else if(tickCount<26) interval=85;
+    else                  interval=125;
+    reelTickInterval=setTimeout(tick, interval);
+  }
+  tick();
+}
+function soundReelStop(){
+  // 彻底停止tick
+  reelTickRunning=false;
+  reelTickInterval && clearTimeout(reelTickInterval);
+  reelTickInterval=null;
+  try{
+    const ctx=getAudio();
+    const bufSize=Math.floor(ctx.sampleRate*0.08);
+    const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++){
+      const env=Math.exp(-i/(bufSize*0.12));
+      data[i]=(Math.random()*2-1)*env;
+    }
+    const src=ctx.createBufferSource();
+    src.buffer=buf;
+    const hpf=ctx.createBiquadFilter();
+    hpf.type='highpass';
+    hpf.frequency.value=1800;
+    const g=ctx.createGain();
+    src.connect(hpf);hpf.connect(g);g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.7,ctx.currentTime);
+    src.start(ctx.currentTime);src.stop(ctx.currentTime+0.08);
+    const osc=ctx.createOscillator();
+    const og=ctx.createGain();
+    osc.connect(og);og.connect(ctx.destination);
+    osc.type='sine';
+    osc.frequency.setValueAtTime(180,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(60,ctx.currentTime+0.07);
+    og.gain.setValueAtTime(0.4,ctx.currentTime);
+    og.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.09);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.09);
+    const osc2=ctx.createOscillator();
+    const og2=ctx.createGain();
+    osc2.connect(og2);og2.connect(ctx.destination);
+    osc2.type='triangle';
+    osc2.frequency.setValueAtTime(4200,ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(2000,ctx.currentTime+0.04);
+    og2.gain.setValueAtTime(0.1,ctx.currentTime);
+    og2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.05);
+    osc2.start(ctx.currentTime);osc2.stop(ctx.currentTime+0.05);
+  }catch(e){}
 }
 
 // =================================================================
@@ -741,7 +1311,7 @@ function spinReel(reelEl,stopDelay,cb){
     reelEl.classList.remove('spinning');
     reelEl.style.transition='transform 0.55s cubic-bezier(0.17,0.67,0.35,1.3)';
     reelEl.style.transform='translateY(-264px)';
-    // 用 setTimeout 保底，不依赖 transitionend
+    soundReelStop();
     setTimeout(()=>{ if(cb)cb(); }, 600);
   },stopDelay);
 }
@@ -752,8 +1322,9 @@ function spinReel(reelEl,stopDelay,cb){
 function buildQuestion(wordObj){
   const correctCount=wordObj.options.filter(o=>o.correct).length;
   const isMulti=correctCount>1;
-  // 随机决定题型：A=直接显示单词，B=显示例句
-  const type=Math.random()<0.5?'A':'B';
+  // 随机决定题型：A=直接显示单词，B=显示例句，C=自测模式
+  const r=Math.random();
+  const type=r<0.34?'A':r<0.67?'B':'C';
   const opts=shuffle([...wordObj.options]);
   return {wordObj,type,opts,isMulti};
 }
@@ -774,7 +1345,27 @@ function renderQuestion(q,qidx){
   }
 
   // 题目
-  if(q.type==='A'){
+  if(q.type==='C'){
+    // 自测模式
+    const correctOpts=q.wordObj.options.filter(o=>o.correct);
+    html+=`<span class="self-test-word">${q.wordObj.word}</span>`;
+    html+=`<span class="self-test-pos">${q.wordObj.pos}</span>`;
+    html+='<div class="self-test-hint">👁 点击下方色块，揭开中文含义</div>';
+    html+=`<div class="reveal-mask" id="mask${qidx}" onclick="revealMeaning(${qidx})">`;
+    html+='<div class="mask-cover" id="maskCover'+qidx+'">▋▋▋ 点击揭开 ▋▋▋</div>';
+    html+='<div class="meaning-content" id="meaningContent'+qidx+'">';
+    correctOpts.forEach((opt,i)=>{
+      html+=`<div class="meaning-item"><span class="m-label">${i+1}.</span>${opt.text}</div>`;
+    });
+    if(q.wordObj.sentence){
+      html+=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-style:italic;font-size:0.88rem;color:var(--text-dim);line-height:1.7">${q.wordObj.sentence}</div>`;
+    }
+    html+='</div></div>';
+    html+='<div class="self-judge-btns" id="selfJudge'+qidx+'">';
+    html+=`<button class="btn-correct-self" id="selfCorrect${qidx}" onclick="selfJudge(${qidx},true)">答对了</button>`;
+    html+=`<button class="btn-wrong-self" id="selfWrong${qidx}" onclick="selfJudge(${qidx},false)">答错了</button>`;
+    html+='</div>';
+  } else if(q.type==='A'){
     html+=`<span class="q-word">${q.wordObj.word}</span>`;
     html+=`<span class="q-pos">${q.wordObj.pos}</span>`;
     html+='<div class="q-prompt">这个单词的含义是？</div>';
@@ -787,23 +1378,97 @@ function renderQuestion(q,qidx){
     html+='<div class="q-prompt">句中高亮单词的含义是？</div>';
   }
 
-  // 选项
-  html+='<div class="options">';
-  q.opts.forEach((opt,i)=>{
-    html+=`<button class="option-btn" data-idx="${i}" onclick="selectOption(this,${qidx},${i})">`;
-    html+=`<span class="opt-label">${labels[i]}</span>${opt.text}</button>`;
-  });
-  html+='</div>';
+  if(q.type!=='C'){
+    // 选项
+    html+='<div class="options">';
+    q.opts.forEach((opt,i)=>{
+      html+=`<button class="option-btn" data-idx="${i}" onclick="selectOption(this,${qidx},${i})">`;
+      html+=`<span class="opt-label">${labels[i]}</span>${opt.text}</button>`;
+    });
+    html+='</div>';
 
-  // 多选提交
-  if(q.isMulti){
-    html+=`<button class="submit-multi" id="submitBtn${qidx}" onclick="submitMulti(${qidx})">确认提交</button>`;
+    // 多选提交
+    if(q.isMulti){
+      html+=`<button class="submit-multi" id="submitBtn${qidx}" onclick="submitMulti(${qidx})">确认提交</button>`;
+    }
   }
 
   // 结果区
   html+=`<div class="q-result" id="result${qidx}"><span class="msg"></span><span class="score-delta"></span></div>`;
 
   card.innerHTML=html;
+}
+
+// =================================================================
+// 自测模式交互
+// =================================================================
+function revealMeaning(qidx){
+  const q=currentQs[qidx];
+  if(q.answered)return;
+  const cover=document.getElementById('maskCover'+qidx);
+  const content=document.getElementById('meaningContent'+qidx);
+  if(!cover||content.classList.contains('visible'))return;
+  cover.classList.add('hidden');
+  content.classList.add('visible');
+  // 揭开后显示自判按钮
+  const btns=document.getElementById('selfJudge'+qidx);
+  if(btns){
+    btns.querySelectorAll('button').forEach(b=>b.classList.add('active'));
+  }
+}
+
+function selfJudge(qidx,isCorrect){
+  const q=currentQs[qidx];
+  if(q.answered)return;
+  // 确保已揭开
+  revealMeaning(qidx);
+  q.answered=true;
+  const btns=document.getElementById('selfJudge'+qidx);
+  if(btns) btns.querySelectorAll('button').forEach(b=>{b.disabled=true;b.style.opacity='0.45';});
+
+  let isCrit=false,delta;
+  if(isCorrect){
+    combo++;
+    if(combo>bestCombo){bestCombo=combo;LS.set('bestCombo',bestCombo);}
+    const mult=Math.min(combo,4);
+    delta=10*mult;
+    isCrit=Math.random()<0.15;
+    if(isCrit)delta*=2;
+    score+=delta;
+    todayData.correct++;
+    LS.set('score_'+todayKey,score);
+    if(isCrit){soundCrit();showCritLabel();flash('crit-flash');}
+    else{soundCorrect();flash('correct-flash');}
+    if(combo>=2)soundComboUp();
+    document.getElementById('qcard'+qidx).classList.add('answered-correct');
+  } else {
+    const penalty=5*Math.min(Math.max(combo,1),4);
+    delta=-penalty;
+    score=Math.max(0,score+delta);
+    combo=0;
+    LS.set('score_'+todayKey,score);
+    soundWrong();flash('wrong-flash');
+    const card=document.getElementById('qcard'+qidx);
+    card.classList.add('answered-wrong','shake');
+    setTimeout(()=>card.classList.remove('shake'),500);
+  }
+  todayData.total++;
+  LS.set('today_'+todayKey,todayData);
+
+  const resultEl=document.getElementById('result'+qidx);
+  resultEl.classList.add('show',isCorrect?'correct-fb':'wrong-fb');
+  resultEl.querySelector('.msg').textContent=isCorrect
+    ?(isCrit?'🎰 暴击！自测正确！':'✓ 自测正确！')+(combo>=2?' COMBO ×'+combo:'')
+    :'✗ 自测错误，继续加油';
+  resultEl.querySelector('.score-delta').textContent=(delta>0?'+':'')+delta;
+  showScorePopup(delta,isCrit);
+  showCombo();
+  updateUI();
+
+  answeredCount++;
+  if(answeredCount>=totalQs){
+    setTimeout(()=>document.getElementById('spinBtn').disabled=false,600);
+  }
 }
 
 // =================================================================
@@ -862,7 +1527,7 @@ function judgeQuestion(qidx,selectedIdxs){
     if(isCrit)delta*=2;
     score+=delta;
     todayData.correct++;
-    LS.set('score',score);
+    LS.set('score_'+todayKey,score);
     if(isCrit){soundCrit();showCritLabel();flash('crit-flash');}
     else{soundCorrect();flash('correct-flash');}
     if(combo>=2)soundComboUp();
@@ -872,7 +1537,7 @@ function judgeQuestion(qidx,selectedIdxs){
     delta=-penalty;
     score=Math.max(0,score+delta);
     combo=0;
-    LS.set('score',score);
+    LS.set('score_'+todayKey,score);
     soundWrong();flash('wrong-flash');
     card.classList.add('answered-wrong');
     card.classList.add('shake');
@@ -908,6 +1573,7 @@ function spin(){
   answeredCount=0;
   document.getElementById('spinBtn').disabled=true;
   document.getElementById('questionsArea').innerHTML='';
+  soundReelStart();
 
   const picked=shuffle(WORD_BANK).slice(0,3);
   currentQs=picked.map(w=>buildQuestion(w));

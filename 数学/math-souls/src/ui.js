@@ -390,7 +390,7 @@ const UI = (() => {
       return '<div class="log-entry">'
         + '<div class="log-hd"><span class="log-num">第 ' + (m.attempts.length - i) + ' 次尝试</span><span class="log-date">' + a.timestamp.slice(0,10) + '</span></div>'
         + (a.approach ? '<div class="log-fl">思路</div><div class="log-fv">' + a.approach + '</div>' : '')
-        + (a.failure_reason ? '<div class="log-fl">失败原因</div><div class="log-fv">' + a.failure_reason + '</div>' : '')
+        + (a.failure_reason ? '<div class="log-fl">不通原因</div><div class="log-fv">' + a.failure_reason + '</div>' : '')
         + wUsed
         + '</div>';
     }).join('');
@@ -409,7 +409,7 @@ const UI = (() => {
         + '<div id="attempt-weapon-picker" style="display:flex;flex-wrap:wrap;gap:6px">' + wpickHtml + '</div></div>'
         + '<textarea id="f-approach" rows="3" placeholder="这次尝试的方向和思路..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-body);font-size:.85rem;padding:10px;resize:vertical;margin-bottom:8px"></textarea>'
         + '<textarea id="f-reason" rows="2" placeholder="哪里卡住了，为何没能突破..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-body);font-size:.85rem;padding:10px;resize:vertical;margin-bottom:10px"></textarea>'
-        + '<button id="f-submit" style="padding:10px 24px;background:var(--algebra);color:#fff;border:none;border-radius:8px;font-family:var(--font-mono);font-size:.75rem;cursor:pointer">记录失败</button>'
+        + '<button id="f-submit" style="padding:10px 24px;background:var(--algebra);color:#fff;border:none;border-radius:8px;font-family:var(--font-mono);font-size:.75rem;cursor:pointer">记录不通</button>'
         + ' <button id="f-cancel" style="padding:10px 16px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-family:var(--font-mono);font-size:.75rem;cursor:pointer">取消</button>'
         + '</div>';
     }
