@@ -4,35 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "c22414d790b821e3",
+        "id": "6550f5c15d7d3bc4",
         "type": "tabs",
         "children": [
           {
-            "id": "bb24dad86d692115",
+            "id": "ed4bc5ffff4d9fb8",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语/论点-论据原则.md",
+                "file": "英语/翻译.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "论点-论据原则"
+              "title": "翻译"
             }
           },
           {
-            "id": "d0d36ef3bd54bf67",
+            "id": "ce13149e9615f91c",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "英语/论点-论据原则.md",
+                "file": "英语/翻译.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "论点-论据原则"
+              "title": "翻译"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "color",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -76,7 +76,7 @@
                 "sortOrder": "alphabetical"
               },
               "icon": "lucide-search",
-              "title": "Search"
+              "title": "搜索"
             }
           },
           {
@@ -179,10 +179,36 @@
       "bases:新建数据库": false
     }
   },
-  "active": "d0d36ef3bd54bf67",
+  "active": "ce13149e9615f91c",
   "lastOpenFiles": [
-    "英语/七选五做题方法.md",
+    "英语/听力.md",
+    "英语/翻译.md",
+    "数学/数学笔记/伯努利不等式.md",
+    "数学/数学笔记/Dirichlet逼近定理.md",
+    "数学/数学笔记/离散-连续的转化.md",
+    "数学/数学笔记/鸽巢原理.md",
+    "dirichlet_practice_problems.md",
+    "数学/数学笔记/epslion room.md",
+    "@dirichlet_practice_problems.md",
+    "图片/Pasted image 20260322112412.png",
+    "weierstrass_approximation.nb",
+    "dirichlet_approximation.nb",
+    "README.md",
+    "dirichlet_approximation_simple.html",
+    "项目文件总结.md",
+    "完成清单.md",
+    "快速开始.md",
+    "启动服务器.ps1",
+    "启动服务器.bat",
+    "Obsidian_嵌入指南.md",
+    "dirichlet_approximation.html",
+    "图片/Pasted image 20260322103937.png",
+    "离散-连续的转化.md",
+    "epsilon room.md",
+    "图片",
+    "图片/Pasted image 20260322101920.png",
     "英语/论点-论据原则.md",
+    "英语/七选五做题方法.md",
     "数学/math-souls/皮亚诺公理.html",
     "数学/math-souls/皮亚诺公理.hrml",
     "数学/数学笔记",
@@ -191,40 +217,15 @@
     "择校/Pasted image 20260320100144.png",
     "择校/Pasted image 20260320100123.png",
     "择校/Pasted image 20260320100108.png",
-    "择校",
     "数学/math-souls/择校/Pasted image 20260320100108.png",
-    "数学/math-souls/择校",
-    "数学/math-souls/katex.min.css",
-    "数学/math-souls/katex.min.js",
-    "数学/math-souls/three.min.js",
     "数学/math-souls/README.md",
     "Pasted image 20260320100144.png",
     "Pasted image 20260320100123.png",
     "Pasted image 20260320100108.png",
-    "英语/word老虎机说明文档.txt",
-    "英语/word.html",
-    "Pasted image 20250308213827.png",
     "CS/数据结构/solved problems/排序【验证】.md",
     "CS/大自然记忆法/树.md",
     "CS/操作系统/OS发展历史.md",
     "CS/操作系统/OS运行环境.md",
-    "CS/操作系统/系统调用.md",
-    "CS/操作系统/操作系统.md",
-    "CS/操作系统/并发.md",
-    "Untitled/Math/实变函数复习.md",
-    "Pasted image 20250325212942.png",
-    "分时操作系统.md",
-    "英语/阅读/历年真题/2011 英一.md",
-    "英语/阅读/具有暗示下的词语.md",
-    "英语/阅读/阅读工具箱.md",
-    "英语/乱糟糟的语料库.md",
-    "Untitled/Math/分析学通鉴（pausing）/第三卷：统一的野心——分析、代数与几何的共舞/0.1 第三章鸟览.md",
-    "Untitled/Math/分析学通鉴（pausing）/第二卷：空间的交响—从欧氏到抽象/0.1 第二章鸟览.md",
-    "Untitled/我的互联网老师们.md",
-    "CS/组成原理/主存储器.md",
-    "Pasted image 20250320104525.png",
-    "Untitled/Math/分析学通鉴（pausing）/第一卷：分析的基石—从收敛性到无限维/微积分的婴儿期.md",
-    "Untitled/Math/分析学通鉴（pausing）/@@短期大纲@@.md",
-    "CS/组成原理/存储器.md"
+    "CS/操作系统/系统调用.md"
   ]
 }
